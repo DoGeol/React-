@@ -33,6 +33,20 @@ export default class Contact extends React.Component {
         this.handleRemove = this.handleRemove.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
     }
+    componentWillMount(){
+        const contactData = localStorage.contactData;
+        if(contactData){
+          this.setState({
+            contactData: JSON.parse(contactData)
+          })
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState){
+      if(JSON.stringify(prevState.contactData) != JSON.stringify(this.state.contactData)){
+        localStorage.contactData = JSON.stringify(this.state.contactData);
+      }
+    }
 
     handleChange(e){
       this.setState({
@@ -44,7 +58,7 @@ export default class Contact extends React.Component {
       this.setState({
         selectedKey: key
       });
-      console.log(key,'is selectedkey');
+      console.log(key,'is selectedKey');
     }
 
     handleCreate(contact){
@@ -54,13 +68,19 @@ export default class Contact extends React.Component {
     }
 
     handleRemove(){
+      if(this.state.selectedKey < 0){
+        return 0;
+      }
       this.setState({
-        contactDate: update(this.state.contactData,{$splice:[[this.state.selectedKey,1]]}),
+        contactData: update(this.state.contactData,{$splice:[[this.state.selectedKey,1]]}),
         selectedKey: -1
       });
     }
 
     handleEdit(name, phone){
+      if(this.state.selectedKey < 0){
+        return 0;
+      }
       this.setState({
         contactData: update(this.state.contactData,
           {
@@ -100,6 +120,8 @@ export default class Contact extends React.Component {
                 <ContactDetails
                   isSelected={this.state.selectedKey != -1}
                   contact={this.state.contactData[this.state.selectedKey]}
+                  onRemove={this.handleRemove}
+                  onEdit={this.handleEdit}
                   />
                 <ContactCreate onCreate={this.handleCreate}/>
             </div>
